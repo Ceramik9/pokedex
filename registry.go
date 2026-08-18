@@ -1,22 +1,13 @@
 package main
 
+type config struct {
+	registry map[string]cliCommand
+}
 
 type cliCommand struct {
 	name string
 	description string
-	callback func() error
+	callback func(*config) error
 }
 
-var supportedCommands = map[string]cliCommand{
-	"exit": {
-		name: "exit",
-		description: "Exit the Pokedex",
-		callback: commandExit,
-	},
-	"help": {
-		name: "help",
-		description: "Displays a help message",
-		callback: commandHelp,
-	},
-}
 
