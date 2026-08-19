@@ -8,40 +8,23 @@ import (
 
 func main() {
 	
-	con := config{
-		registry: map[string]cliCommand{
-			"exit": {
-				name: "exit",
-				description: "Exit the Pokedex",
-				callback: commandExit,
-			},
-			"help": {
-				name: "help",
-				description: "Displays a help message",
-				callback: commandHelp,
-			},
-			"map": {
-				name: "map",
-				description: "Displays next 20 locations in Pokemon world",
-				callback: commandMap,
-			},
-			"mapb": {
-				name: "mapb",
-				description: "Displays previous 20 locations in Pokemon world",
-				callback: commandMapb,
-			},
-		},
-	}
+	// initialise io buffer
 	scanner := bufio.NewScanner(os.Stdin)
+	
+	// program loop
 	for {
 		fmt.Print("Pokedex > ")
+
+		// user commnd input
 		scanner.Scan()
 		inputCommand := scanner.Text()
-		command, ok := con.registry[inputCommand]
+
+		// check if the command is a valid command
+		command, ok := commandList.registry[inputCommand]
 		if !ok {
 			fmt.Println("Unknown command")
 		} else {
-			err := command.callback(&con)
+			err := command.callback(&commandList)
 			if err != nil {
 				fmt.Println(err)
 			}
