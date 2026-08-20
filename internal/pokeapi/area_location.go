@@ -1,9 +1,12 @@
 package pokeapi
 
 import (
+	"io"
 	"fmt"
+	"time"
 	"encoding/json"
 	"net/http"
+	"github.com/Ceramik9/pokedex/internal/pokecache"
 )
 
 type locationArea struct {
@@ -13,8 +16,20 @@ type locationArea struct {
 	Results  []results `json:"results"`
 }
 
-func (l locationArea) Update(url string) error {
+var pokeCache = pokecache.NewCache(5 * time.Second)
+
+func (l *locationArea) Update(url string) error {
 	
+	//check for cached data
+	data, ok := pokeCache.Get(url)
+	if ok {
+		err := json.Unmarshal(data, &l)
+		if err != nil {
+			return fmt.Errorf("Unmarshal cache data failer: %w", err)
+		}
+		return nil
+	}
+
 	//request data
 	res, err := http.Get(url)
 	if err != nil {
@@ -22,9 +37,16 @@ func (l locationArea) Update(url string) error {
 	}
 	defer res.Body.Close()
 	
-	//decode data and update mapLocations
-	decoder := json.NewDecoder(res.Body)
-	err = decoder.Decode(&MapLocations)
+	// save response as []byte
+	data, err = io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("Error reading response: %w", err)
+	}
+	// cache data
+	pokeCache.Add(url, data)
+
+	// update data from response
+	err = json.Unmarshal(data, &l)
 	if err != nil {
 		return fmt.Errorf("Decoding failed: %w", err)
 	}
@@ -35,7 +57,7 @@ func (l locationArea) PrintLocation() error {
 	if MapLocations.Results == nil {
 		return fmt.Errorf("locations are empty")
 	}
-	for _, location := range MapLocations.Results {
+	for _, location := range l.Results {
 		fmt.Println(location.Name)
 	}
 	return nil
@@ -46,7 +68,7 @@ type results struct {
 	URL  string `json:"url"`
 }
 
-// allocates locationArea in memory
+// allocate locationArea in memory
 var MapLocations locationArea
 
 // default map url

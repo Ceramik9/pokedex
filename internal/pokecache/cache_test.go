@@ -12,11 +12,11 @@ func TestAddGet(t *testing.T) {
 		val []byte
 	}{
 		{
-			key: "https://example.com",
+			key: "https://pokeapi.co/api/v2/location-area?offset=0&limit=20",
 			val: []byte("testdata"),
 		},
 		{
-			key: "https://example.com/path",
+			key: "https://pokeapi.co/api/v2/location-area?offset=20&limit=20",
 			val: []byte("moretestdata"),
 		},
 	}

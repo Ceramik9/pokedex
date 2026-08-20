@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+// Program cache
+var PokeCache = NewCache(5 * time.Second)
+
 func NewCache(interval time.Duration) *Cache {
 	
 	//create new cache
