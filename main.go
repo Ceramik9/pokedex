@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	
+
 	// initialise io buffer
 	scanner := bufio.NewScanner(os.Stdin)
 
