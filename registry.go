@@ -33,6 +33,11 @@ var commandList = config{
 			description: "Displays previous 20 locations in Pokemon world",
 			callback: commandMapb,
 		},
+		"explore": {
+		name: "explore",
+		description: "Displays a list of Pokempns in area",
+		callback: commandExplore,
+		},
 	},
 }
 

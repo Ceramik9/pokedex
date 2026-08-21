@@ -9,19 +9,20 @@ import (
 	"github.com/Ceramik9/pokedex/internal/pokecache"
 )
 
-type locationArea struct {
+type LocationArea struct {
 	Count    int       `json:"count"`
 	Next     string    `json:"next"`
 	Previous string    `json:"previous"`
 	Results  []results `json:"results"`
 }
 
-var pokeCache = pokecache.NewCache(5 * time.Second)
+// initialise pokeCashe
+var locationCache = pokecache.NewCache(5 * time.Second)
 
-func (l *locationArea) Update(url string) error {
+func (l *LocationArea) Update(url string) error {
 	
 	//check for cached data
-	data, ok := pokeCache.Get(url)
+	data, ok := locationCache.Get(url)
 	if ok {
 		err := json.Unmarshal(data, &l)
 		if err != nil {
@@ -37,7 +38,7 @@ func (l *locationArea) Update(url string) error {
 	}
 	defer res.Body.Close()
 	
-	// save response as []byte
+	// save response as []byte1
 	data, err = io.ReadAll(res.Body)
 	if err != nil {
 		return fmt.Errorf("Error reading response: %w", err)
@@ -53,8 +54,8 @@ func (l *locationArea) Update(url string) error {
 	return nil
 }
 
-func (l locationArea) PrintLocation() error {
-	if MapLocations.Results == nil {
+func (l LocationArea) PrintLocation() error {
+	if l.Results == nil {
 		return fmt.Errorf("locations are empty")
 	}
 	for _, location := range l.Results {
@@ -68,8 +69,6 @@ type results struct {
 	URL  string `json:"url"`
 }
 
-// allocate locationArea in memory
-var MapLocations locationArea
 
 // default map url
 const DefaultMapURL = "https://pokeapi.co/api/v2/location-area"

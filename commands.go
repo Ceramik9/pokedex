@@ -1,26 +1,20 @@
 package main
 
 import (
-	"strings"
 	"fmt"
 	"os"
 	"github.com/Ceramik9/pokedex/internal/pokeapi"
 )
+// initialise LocationArea struct used in map and mapb
+var MapLocations pokeapi.LocationArea
 
-// possibly not needed
-// delete in the future if not used
-func cleanInput(text string) []string {
-	if len(text) == 0 || text == " " {
-		return []string{}
-	}
-	return strings.Split(strings.Trim(strings.ToLower(text), " "), " ")
-}
 
 func commandExit(*config) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
+
 
 func commandHelp(*config) error {
 	fmt.Println("Welcome to the Pokedex!")
@@ -33,44 +27,58 @@ func commandHelp(*config) error {
 	return nil
 }
 
+
 func commandMap(*config) error {
 	
 	//set url
 	var locationAreaURL string
-	if pokeapi.MapLocations.Next != "" {
-		locationAreaURL = pokeapi.MapLocations.Next
+	if MapLocations.Next != "" {
+		locationAreaURL = MapLocations.Next
 	} else {
 		locationAreaURL = pokeapi.DefaultMapURL
 	}
 
 	//update locations
-	pokeapi.MapLocations.Update(locationAreaURL)
+	MapLocations.Update(locationAreaURL)
 
 	//print list of locations
-	pokeapi.MapLocations.PrintLocation()
+	MapLocations.PrintLocation()
 
 	return nil
 }
 
+
 func commandMapb(*config) error {
 	
 	// checks for first and last page numbers
-	if pokeapi.MapLocations.Previous == "" {
+	if MapLocations.Previous == "" {
 		fmt.Println("you're on the first page")
 		return nil
 	}
-	if pokeapi.LastPrevious == pokeapi.MapLocations.Previous && pokeapi.FirstNext == pokeapi.MapLocations.Next {
+	if pokeapi.LastPrevious == MapLocations.Previous && pokeapi.FirstNext == MapLocations.Next {
 		fmt.Println("you're on the first page")
 		return nil
 	}
 	
 	//update locations
-	pokeapi.MapLocations.Update(pokeapi.MapLocations.Previous)
+	MapLocations.Update(MapLocations.Previous)
 
 	// print list of MapLocations
-	pokeapi.MapLocations.PrintLocation()
+	MapLocations.PrintLocation()
 	
 	return nil
 }
+
+
+func commandExplore(*config) error {
+
+	return nil
+}
+
+
+
+
+
+
 
 
