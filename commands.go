@@ -2,9 +2,40 @@ package main
 
 import (
 	"fmt"
+	"errors"
+	"strings"
 	"os"
 	"github.com/Ceramik9/pokedex/internal/pokeapi"
 )
+
+var command string
+var argument string
+
+
+func cleanInput(text string) []string {
+	if len(text) == 0 || text == " " {
+		return []string{}
+	}
+	return strings.Split(strings.Trim(strings.ToLower(text), " "), " ")
+}
+
+
+func commandParser(input string) (string, string) {
+	command :=  cleanInput(input)
+	if len(command) > 2 {
+		fmt.Println("Too many argumants")
+	}
+	if len(command) == 2 {
+		return command[0], command[1]
+	}
+	if len(command) == 1 {
+		return command[0], ""
+	}
+	return "", ""
+}
+
+
+
 // initialise LocationArea struct used in map and mapb
 var MapLocations pokeapi.LocationArea
 
@@ -69,16 +100,22 @@ func commandMapb(*config) error {
 	return nil
 }
 
+// move this line under a struct with MapLocations
+// initialise LocationInfo
+var pokemonList pokeapi.LocationInfo
 
 func commandExplore(*config) error {
+	fmt.Printf("Exploring %s...\n", userCommand.arg)
+
+	// check for errors
+	err := pokemonList.Update(pokeapi.DefaultMapURL, userCommand.arg)
+	if err != nil {
+		return errors.New("Invalid location")
+	}
+	// print pokemon list
+	pokemonList.PrintData()
 
 	return nil
 }
-
-
-
-
-
-
 
 

@@ -9,19 +9,20 @@ import (
 	"github.com/Ceramik9/pokedex/internal/pokecache"
 )
 
+// create a new struct for cashes
 // initialise pokeCashe
 var pokeCache = pokecache.NewCache(5 * time.Second)
 
-func (li LocationInfo) Update(url, location string) error {
+func (li *LocationInfo) Update(url, location string) error {
 	
 	fullURL := url + "/" + location
 
 	//check for cached data
 	data, ok := pokeCache.Get(fullURL)
 	if ok {
-		err := json.Unmarshal(data, &li)
+		err := json.Unmarshal(data, li)
 		if err != nil {
-			return fmt.Errorf("Unmarshal cache data failer: %w", err)
+			return fmt.Errorf("unmarshal cache data failed: %w", err)
 		}
 		return nil
 	}
@@ -29,40 +30,45 @@ func (li LocationInfo) Update(url, location string) error {
 	//request data
 	res, err := http.Get(fullURL)
 	if err != nil {
-		return fmt.Errorf("Request failed: %w", err)
+		return fmt.Errorf("request failed: %w", err)
 	}
 	defer res.Body.Close()
+	
+	// check response status code
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("non-OK HTTP status: %s\n", res.Status)
+	}
 
 	// save response as []byte1
 	data, err = io.ReadAll(res.Body)
 	if err != nil {
-		return fmt.Errorf("Error reading response: %w", err)
+		return fmt.Errorf("error reading response: %w", err)
 	}
+
 	// cache data
 	pokeCache.Add(fullURL, data)
 
 	// update data from response
-	err = json.Unmarshal(data, &li)
+	err = json.Unmarshal(data, li)
 	if err != nil {
-		return fmt.Errorf("Decoding failed: %w", err)
+		return fmt.Errorf("decoding failed: %w", err)
 	}
 	return nil
 }
 
 
 func (li LocationInfo) PrintData() error {
-	// check if there are any pokemons
 
-	for pokemon, _ := range li.PokemonEncounters {
-	fmt.Println(pokemon)
+	// check if any pokemon have been found in the area
+	if len(li.PokemonEncounters) == 0 {
+		fmt.Println("No Pokemon found")
 	}
-	
-
-
-
-	//if l.Results == nil {
-	//	return fmt.Errorf("locations are empty")
-	//}
+	// Display list of pokemon in the are
+	fmt.Println("Found Pokemon:")
+	for _, encounter := range li.PokemonEncounters {
+		pokemon := encounter.Pokemon.Name
+		fmt.Printf("- %s\n", pokemon)
+	}
 	return nil
 }
 

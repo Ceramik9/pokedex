@@ -1,5 +1,13 @@
 package main
 
+
+type userInput struct {
+	command string
+	arg     string
+}
+
+var userCommand userInput
+
 type config struct {
 	registry map[string]cliCommand
 }
