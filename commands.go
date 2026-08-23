@@ -8,9 +8,6 @@ import (
 	"github.com/Ceramik9/pokedex/internal/pokeapi"
 )
 
-var command string
-var argument string
-
 
 func cleanInput(text string) []string {
 	if len(text) == 0 || text == " " {
@@ -35,11 +32,6 @@ func commandParser(input string) (string, string) {
 }
 
 
-// move this line under a new struct
-// initialise LocationArea struct used in map and mapb
-var MapLocations pokeapi.LocationArea
-
-
 func commandExit(*config) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
@@ -55,6 +47,8 @@ func commandHelp(*config) error {
 	fmt.Println("exit: Exit the Pokedex")
 	fmt.Println("map: Displays next 20 locations in Pokemon world")
 	fmt.Println("mapb: Displays previous 20 locations in Pokemon world")
+	fmt.Println("explore: Displays a list of Pokempns in area")
+	fmt.Println("catch: Attempt to catch the Pokemon")
 	return nil
 }
 
@@ -63,17 +57,17 @@ func commandMap(*config) error {
 	
 	//set url
 	var locationAreaURL string
-	if MapLocations.Next != "" {
-		locationAreaURL = MapLocations.Next
+	if state.mapLocations.Next != "" {
+		locationAreaURL = state.mapLocations.Next
 	} else {
 		locationAreaURL = pokeapi.DefaultMapURL
 	}
 
 	//update locations
-	MapLocations.Update(locationAreaURL)
+	state.mapLocations.Update(locationAreaURL)
 
 	//print list of locations
-	MapLocations.PrintData()
+	state.mapLocations.PrintData()
 
 	return nil
 }
@@ -82,39 +76,61 @@ func commandMap(*config) error {
 func commandMapb(*config) error {
 	
 	// checks for first and last page numbers
-	if MapLocations.Previous == "" {
+	if state.mapLocations.Previous == "" {
 		fmt.Println("you're on the first page")
 		return nil
 	}
-	if pokeapi.LastPrevious == MapLocations.Previous && pokeapi.FirstNext == MapLocations.Next {
+	if pokeapi.LastPrevious == state.mapLocations.Previous && pokeapi.FirstNext == state.mapLocations.Next {
 		fmt.Println("you're on the first page")
 		return nil
 	}
 	
 	//update locations
-	MapLocations.Update(MapLocations.Previous)
+	state.mapLocations.Update(state.mapLocations.Previous)
 
-	// print list of MapLocations
-	MapLocations.PrintData()
+	// print list of mapLocations
+	state.mapLocations.PrintData()
 	
 	return nil
 }
 
-// move this line under a struct with MapLocations
-// initialise LocationInfo
-var pokemonList pokeapi.LocationInfo
 
 func commandExplore(*config) error {
 	fmt.Printf("Exploring %s...\n", userCommand.arg)
 
 	// check for errors
-	err := pokemonList.Update(pokeapi.DefaultMapURL, userCommand.arg)
+	err := state.pokemonList.Update(pokeapi.DefaultMapURL, userCommand.arg)
 	if err != nil {
-		return errors.New("Invalid location")
+		return errors.New("invalid location")
 	}
 	// print pokemon list
-	pokemonList.PrintData()
+	state.pokemonList.PrintData()
 
+	return nil
+}
+
+
+func commandCatch(*config) error {
+	
+	// return error if pokemon name is missing
+	if userCommand.arg == "" {
+		return errors.New("you must provide Pokemon name")
+	}
+	
+	// return error if pokemon name does not exist
+	err := state.pokemon.Update(pokeapi.DefaultPokemonURL, userCommand.arg)
+	if err != nil {
+		return fmt.Errorf("Pokemon %s does not exist", userCommand.arg)
+	}
+	
+	// attemp to catch pokemon
+	fmt.Printf("Throwing a Pokeball at %s...\n", state.pokemon.Name)
+	result := state.pokemon.Catch(state.caughtPokemon)
+	if !result {
+		fmt.Printf("%s escaped!\n", state.pokemon.Name)
+		return nil
+	}
+	fmt.Printf("%s was caught!\n", state.pokemon.Name)
 	return nil
 }
 

@@ -3,10 +3,8 @@ package pokeapi
 import (
 	"io"
 	"fmt"
-	"time"
 	"encoding/json"
 	"net/http"
-	"github.com/Ceramik9/pokedex/internal/pokecache"
 )
 
 type LocationArea struct {
@@ -16,13 +14,11 @@ type LocationArea struct {
 	Results  []results `json:"results"`
 }
 
-// initialise pokeCashe
-var locationCache = pokecache.NewCache(5 * time.Second)
 
 func (la *LocationArea) Update(url string) error {
 	
 	//check for cached data
-	data, ok := locationCache.Get(url)
+	data, ok := pokeCache.Get(url)
 	if ok {
 		err := json.Unmarshal(data, la)
 		if err != nil {
@@ -76,12 +72,3 @@ type results struct {
 }
 
 
-// default map url
-const DefaultMapURL = "https://pokeapi.co/api/v2/location-area"
-
-//used to check if the user is already on the first page
-const LastPrevious = "https://pokeapi.co/api/v2/location-area?offset=0&limit=20"
-const FirstNext = "https://pokeapi.co/api/v2/location-area?offset=20&limit=20"
-
-//used to check if the user is already on the last page
-const LastNext = "https://pokeapi.co/api/v2/location-area?offset=1520&limit=20"

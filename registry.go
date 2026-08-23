@@ -46,6 +46,11 @@ var commandList = config{
 		description: "Displays a list of Pokempns in area",
 		callback: commandExplore,
 		},
+		"catch": {
+			name: "catch",
+			description: "Attempt to catch the Pokemon",
+			callback: commandCatch,
+		},
 	},
 }
 

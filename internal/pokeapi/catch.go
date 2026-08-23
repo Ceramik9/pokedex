@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"math/rand"
 	"encoding/json"
 )
 
-
-func (li *LocationInfo) Update(url, location string) error {
+func (pi *PokemonInfo) Update(url, location string) error {
 	
 	fullURL := url + "/" + location
 
 	//check for cached data
 	data, ok := pokeCache.Get(fullURL)
 	if ok {
-		err := json.Unmarshal(data, li)
+		err := json.Unmarshal(data, pi)
 		if err != nil {
 			return fmt.Errorf("unmarshal cache data failed: %w", err)
 		}
@@ -44,7 +44,7 @@ func (li *LocationInfo) Update(url, location string) error {
 	pokeCache.Add(fullURL, data)
 
 	// update data from response
-	err = json.Unmarshal(data, li)
+	err = json.Unmarshal(data, pi)
 	if err != nil {
 		return fmt.Errorf("decoding failed: %w", err)
 	}
@@ -52,20 +52,32 @@ func (li *LocationInfo) Update(url, location string) error {
 }
 
 
-func (li LocationInfo) PrintData() error {
+func (pi PokemonInfo) Catch(pokemonList map[string]PokemonInfo) bool {
+	
+	//set chance
+	var chance int
+	if pi.BaseExperience < 100 {
+		chance = 80
+	} else if pi.BaseExperience < 200 {
+		chance = 60
+	} else {
+		chance = 40
+	}
 
-	// check if any pokemon have been found in the area
-	if len(li.PokemonEncounters) == 0 {
-		fmt.Println("No Pokemon found")
-		return nil
+	// catch attempt
+	attempt := (rand.Intn(pi.BaseExperience) * 100) / pi.BaseExperience
+	
+	//result
+	if attempt >= chance {
+		pokemonList[pi.Name] = pi
+		return true
 	}
-	// Display list of pokemon in the area
-	fmt.Println("Found Pokemon:")
-	for _, encounter := range li.PokemonEncounters {
-		pokemon := encounter.Pokemon.Name
-		fmt.Printf("- %s\n", pokemon)
-	}
-	return nil
+	return false
 }
+
+
+
+
+
 
 
