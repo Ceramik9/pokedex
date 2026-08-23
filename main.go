@@ -27,6 +27,8 @@ func main() {
 		if !ok {
 			fmt.Println("Unknown command")
 		} else {
+
+			// check for any errors
 			err := command.callback(&commandList)
 			if err != nil {
 				fmt.Println(err)

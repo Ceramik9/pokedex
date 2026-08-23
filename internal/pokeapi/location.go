@@ -19,12 +19,12 @@ type LocationArea struct {
 // initialise pokeCashe
 var locationCache = pokecache.NewCache(5 * time.Second)
 
-func (l *LocationArea) Update(url string) error {
+func (la *LocationArea) Update(url string) error {
 	
 	//check for cached data
 	data, ok := locationCache.Get(url)
 	if ok {
-		err := json.Unmarshal(data, &l)
+		err := json.Unmarshal(data, la)
 		if err != nil {
 			return fmt.Errorf("Unmarshal cache data failer: %w", err)
 		}
@@ -37,6 +37,11 @@ func (l *LocationArea) Update(url string) error {
 		return fmt.Errorf("Request failed: %w", err)
 	}
 	defer res.Body.Close()
+
+	// check response status code
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("non-OK HTTP status: %s\n", res.Status)
+	}
 	
 	// save response as []byte1
 	data, err = io.ReadAll(res.Body)
@@ -47,22 +52,23 @@ func (l *LocationArea) Update(url string) error {
 	pokeCache.Add(url, data)
 
 	// update data from response
-	err = json.Unmarshal(data, &l)
+	err = json.Unmarshal(data, la)
 	if err != nil {
 		return fmt.Errorf("Decoding failed: %w", err)
 	}
 	return nil
 }
 
-func (l LocationArea) PrintLocation() error {
-	if l.Results == nil {
+func (la LocationArea) PrintData() error {
+	if la.Results == nil {
 		return fmt.Errorf("locations are empty")
 	}
-	for _, location := range l.Results {
+	for _, location := range la.Results {
 		fmt.Println(location.Name)
 	}
 	return nil
 }
+
 
 type results struct {
 	Name string `json:"name"`

@@ -62,8 +62,9 @@ func (li LocationInfo) PrintData() error {
 	// check if any pokemon have been found in the area
 	if len(li.PokemonEncounters) == 0 {
 		fmt.Println("No Pokemon found")
+		return nil
 	}
-	// Display list of pokemon in the are
+	// Display list of pokemon in the area
 	fmt.Println("Found Pokemon:")
 	for _, encounter := range li.PokemonEncounters {
 		pokemon := encounter.Pokemon.Name
@@ -71,8 +72,5 @@ func (li LocationInfo) PrintData() error {
 	}
 	return nil
 }
-
-
-
 
 

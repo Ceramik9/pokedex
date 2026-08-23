@@ -35,7 +35,7 @@ func commandParser(input string) (string, string) {
 }
 
 
-
+// move this line under a new struct
 // initialise LocationArea struct used in map and mapb
 var MapLocations pokeapi.LocationArea
 
@@ -73,7 +73,7 @@ func commandMap(*config) error {
 	MapLocations.Update(locationAreaURL)
 
 	//print list of locations
-	MapLocations.PrintLocation()
+	MapLocations.PrintData()
 
 	return nil
 }
@@ -95,7 +95,7 @@ func commandMapb(*config) error {
 	MapLocations.Update(MapLocations.Previous)
 
 	// print list of MapLocations
-	MapLocations.PrintLocation()
+	MapLocations.PrintData()
 	
 	return nil
 }
