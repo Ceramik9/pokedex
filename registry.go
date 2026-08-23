@@ -51,6 +51,16 @@ var commandList = config{
 			description: "Attempt to catch the Pokemon",
 			callback: commandCatch,
 		},
+		"inspect": {
+			name: "inspect",
+			description: "Display pokemon stats",
+			callback: commandInspect,
+		},
+		"pokedex": {
+			name: "pokedex",
+			description: "Displays the list of caught Pokemon",
+			callback: commandPokedex,
+		},
 	},
 }
 

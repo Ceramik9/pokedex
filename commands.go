@@ -49,6 +49,8 @@ func commandHelp(*config) error {
 	fmt.Println("mapb: Displays previous 20 locations in Pokemon world")
 	fmt.Println("explore: Displays a list of Pokempns in area")
 	fmt.Println("catch: Attempt to catch the Pokemon")
+	fmt.Println("inspect: Display Pokemon stats")
+	fmt.Println("pokedex: Displays the list of caught Pokemon")
 	return nil
 }
 
@@ -126,11 +128,61 @@ func commandCatch(*config) error {
 	// attemp to catch pokemon
 	fmt.Printf("Throwing a Pokeball at %s...\n", state.pokemon.Name)
 	result := state.pokemon.Catch(state.caughtPokemon)
+	
+	// failure
 	if !result {
 		fmt.Printf("%s escaped!\n", state.pokemon.Name)
 		return nil
 	}
+	
+	// success
 	fmt.Printf("%s was caught!\n", state.pokemon.Name)
+	fmt.Println("You may now inspect it with the inspect command.")
+	return nil
+}
+
+
+func commandInspect(*config) error {
+	
+	// return error if pokemon name is missing
+	if userCommand.arg == "" {
+		return errors.New("you must provide Pokemon name")
+	}
+	
+	// check if pokemon was caught
+	// if ok display pokemon stats
+	pokemon, ok := state.caughtPokemon[userCommand.arg]
+	if ok {
+		fmt.Printf("Name: %s\n", pokemon.Name)
+		fmt.Printf("Height: %d\n",pokemon.Height)
+		fmt.Printf("Weight: %d\n", pokemon.Weight)
+		fmt.Println("Stats:")
+		for _, stat := range pokemon.Stats {
+			fmt.Printf("  -%s: %d\n", stat.Stat.Name, stat.BaseStat)
+		}
+		fmt.Println("Types:")
+		for _, typ := range pokemon.Types {
+				fmt.Printf("  - %s\n", typ.Type.Name)
+			}
+		return nil
+	}
+	// return error if pokemon hasn't been caught
+	return fmt.Errorf("you haven't caught %s\n", userCommand.arg)
+}
+
+
+func commandPokedex(*config) error {
+	
+	// check if pokedex is empty
+	if len(state.caughtPokemon) == 0 {
+		errors.New("you haven't caught any Pokemon yet")
+	}
+
+	// display a list of caught pokemon
+	fmt.Println("Your Pokedex:")
+	for _, pokemon := range state.caughtPokemon {
+		fmt.Printf(" - %s\n", pokemon.Name)
+	}
 	return nil
 }
 
